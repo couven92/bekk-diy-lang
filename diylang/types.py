@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=missing-docstring
 
 """
 This module holds some types we'll have use for along the way.
@@ -16,7 +17,10 @@ class DiyLangError(Exception):
 class Closure(object):
 
     def __init__(self, env, params, body):
-        raise NotImplementedError("DIY")
+        super().__init__()
+        self.env = env
+        self.params = params
+        self.body = body
 
     def __repr__(self):
         return "<closure/%d>" % len(self.params)
@@ -28,13 +32,20 @@ class Environment(object):
         self.bindings = variables if variables else {}
 
     def lookup(self, symbol):
-        raise NotImplementedError("DIY")
+        val = self.bindings.get(symbol)
+        if val is None and symbol not in self.bindings:
+            raise DiyLangError("Unknown symbol: '{}'".format(symbol))
+        return val
 
-    def extend(self, variables):
-        raise NotImplementedError("DIY")
+    def extend(self, variables: dict):
+        new_bindings = self.bindings.copy()
+        new_bindings.update(variables)
+        return Environment(new_bindings)
 
     def set(self, symbol, value):
-        raise NotImplementedError("DIY")
+        if symbol in self.bindings:
+            raise DiyLangError("Symbol '{}' is already defined.".format(symbol))
+        self.bindings[symbol] = value
 
 
 class String(object):
